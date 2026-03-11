@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HuKaHuKa · 官网</title>
+    <!-- Bootstrap 5 核心 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        body, html {
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+        /* ----- 顶部英雄区 (黑灰背景 + 大浅色泡泡) 高度60vh ----- */
+        .hero-section {
+            position: relative;
+            background-color: #1e2329;
+            height: 60vh;
+            min-height: 360px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+            overflow: hidden;
+            width: 100%;
+        }
+        #bubble-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 1.5rem 1.5rem 3rem 1.5rem;
+            width: 100%;
+        }
+        .hero-content h1 {
+            font-size: 5rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+        }
+        .hero-content .lead {
+            font-weight: 300;
+            letter-spacing: 0.2rem;
+            opacity: 0.9;
+        }
+        .hero-arrow {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2.8rem;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s;
+            opacity: 0.8;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            z-index: 3;
+            line-height: 1;
+        }
+        .hero-arrow:hover {
+            transform: translateX(-50%) translateY(6px);
+            opacity: 1;
+        }
+
+        /* 白色背景通用区 */
+        .section-white {
+            background-color: #ffffff;
+            padding: 5rem 0;
+            color: #1e2a3a;
+        }
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 3rem;
+            color: #1e2329;
+            position: relative;
+        }
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: #0d6efd;
+            margin: 0.7rem auto 0;
+            border-radius: 2px;
+        }
+
+        /* 开发人员头像 (img自带圆角) */
+        .dev-avatar {
+            border-radius: 50%;
+            width: 160px;
+            height: 160px;
+            object-fit: cover;
+            box-shadow: 0 15px 25px -8px rgba(13, 110, 253, 0.3);
+            border: 4px solid rgba(13, 110, 253, 0.3);
+        }
+        .dev-info {
+            font-size: 1.2rem;
+            line-height: 1.7;
+            color: #2d3e50;
+        }
+
+        /* 卡片统一风格 */
+        .custom-card {
+            border: none;
+            border-radius: 28px;
+            background: #ffffff;
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(13, 110, 253, 0.1);
+            transition: all 0.25s ease;
+            overflow: hidden;
+            padding: 2rem 1.8rem;
+            height: 100%;
+            width: 100%;
+        }
+        .custom-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 28px 38px -10px rgba(13, 110, 253, 0.25);
+        }
+        /* 应用图片：圆角 img */
+        .app-image {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            border-radius: 24px;
+            box-shadow: 0 12px 20px -10px rgba(0,0,0,0.2);
+            border: 2px solid rgba(13, 110, 253, 0.2);
+        }
+        .project-btn {
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 40px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            border: none;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .project-btn:hover {
+            background-color: #0b5ed7;
+            color: white;
+        }
+        .btn-wide {
+            width: 100%;
+            max-width: 300px; /* 限制最大宽度，避免过宽 */
+        }
+        @media (min-width: 768px) {
+            .btn-wide {
+                width: auto;
+                min-width: 240px; /* 确保按钮足够宽 */
+            }
+        }
+
+        /* 作者的话气泡 (黑灰色) */
+        .talk-bubble {
+            background: #2c3e50;
+            border-radius: 32px 32px 32px 8px;
+            padding: 2rem 2.2rem;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 18px 28px -12px rgba(0,0,0,0.5);
+            border: 1px solid #1e2a3a;
+            color: #f0f4f8;
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+        .talk-bubble::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            bottom: -20px;
+            width: 0;
+            height: 0;
+            border: 20px solid transparent;
+            border-top-color: #2c3e50;
+            border-bottom: 0;
+            border-left: 0;
+            filter: drop-shadow(4px 8px 6px rgba(0,0,0,0.2));
+        }
+        .talk-bubble i.bi-chat-quote-fill {
+            color: #8bb9fe;
+            opacity: 0.9;
+            margin-right: 8px;
+        }
+        .talk-bubble .fst-italic {
+            color: #bcd0f0;
+        }
+
+        /* 友情链接卡片内链接 */
+        .friend-link {
+            text-decoration: none;
+            color: #1e2a3a;
+            font-weight: 500;
+            display: block;
+        }
+        .friend-link i {
+            color: #0d6efd;
+            margin-right: 8px;
+            font-size: 1.6rem;
+            vertical-align: middle;
+        }
+        .friend-link:hover {
+            color: #0a58ca;
+        }
+
+        /* 底部黑色 */
+        .footer-dark {
+            background-color: #0f1a1f;
+            color: #d9e9f0;
+            padding: 2.5rem 0;
+            font-size: 0.95rem;
+        }
+        .footer-dark a {
+            color: #9ac7fd;
+            text-decoration: none;
+            margin-right: 1.5rem;
+            transition: color 0.2s;
+        }
+        .footer-dark a:hover {
+            color: #ffffff;
+        }
+        .footer-dark .social i {
+            font-size: 1.6rem;
+            margin-right: 0.6rem;
+            color: #8bb9fe;
+        }
+        .disclaimer {
+            border-left: 2px solid #3a6b92;
+            padding-left: 1rem;
+            opacity: 0.8;
+        }
+
+        /* 响应式微调 */
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 3.5rem;
+            }
+            .hero-arrow {
+                bottom: 15px;
+                font-size: 2.4rem;
+            }
+            .dev-avatar {
+                width: 120px;
+                height: 120px;
+                margin-bottom: 1.5rem;
+            }
+            .dev-info {
+                text-align: center;
+            }
+            .hero-section {
+                height: 50vh;
+            }
+            .talk-bubble {
+                padding: 1.5rem;
+            }
+            .custom-card {
+                padding: 1.5rem 1.2rem;
+            }
+            .app-image {
+                max-width: 150px;
+                margin-bottom: 1.5rem;
+            }
+        }
+
+        /* 内部内容限制最大宽度，保证大屏幕可读性（背景仍占满整行） */
+        .card-content {
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== 顶部：黑灰背景 + 大浅色泡泡 ========== -->
+<section class="hero-section" id="hero">
+    <canvas id="bubble-canvas"></canvas>
+    <div class="hero-content container-fluid px-3 px-md-4">
+        <h1>HuKaHuKa</h1>
+        <p class="lead">独立开发 · 纯粹热爱</p>
+    </div>
+    <a href="#intro" class="hero-arrow" style="text-decoration: none; color: white;">
+        <i class="bi bi-arrow-down-circle-fill"></i>
+    </a>
+</section>
+
+<!-- ========== 白色背景区域 ========== -->
+<div class="section-white" id="intro">
+    <div class="container">
+        <!-- 工作室简介 -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="section-title">工作室简介</h2>
+                <p class="lead" style="color: #2d3a4a;">「HuKaHuKa」由独立开发者狐咔一人创建，专注于轻量级Android工具。目前主力项目 HuKaWeb 致力于提供上百个Android接口的一键打包方案，让创意快速落地成APK。</p>
+            </div>
+        </div>
+
+        <hr class="my-5" style="border-top: 2px dashed #b8d4fe; opacity: 0.6;">
+
+        <!-- 开发人员：头像左 简介右 (头像为img自带圆角) -->
+        <div class="row align-items-center justify-content-center g-5 mb-5">
+            <div class="col-md-5 col-lg-4 text-center text-md-end">
+                <img src="Assets/HuKaHuKa.jpg" 
+                     alt="狐咔HuKa头像" 
+                     class="dev-avatar img-fluid">
+            </div>
+            <div class="col-md-7 col-lg-6">
+                <div class="dev-info">
+                    <h3 style="color: #0a58ca; font-weight: 600;">狐咔 HuKa</h3>
+                    <p class="mt-3"><i class="bi bi-code-slash" style="color: #0d6efd; margin-right: 8px;"></i> Android开发爱好者</p>
+                    <p>喜欢把复杂的事情变简单。工作室所有核心工具（包括HuKaWeb）将永久免费提供。目前在读中专，利用课余时间维护项目。</p>
+                    <p><i class="bi bi-emoji-smile" style="color: #0d6efd;"></i> 只有一个人，但效率爆棚。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 项目卡片：PC端左图右文，按钮加宽，卡片占满整行 (col-12) -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-12 text-center">
+                <h2 class="section-title">项目一览</h2>
+            </div>
+            <div class="col-12">
+                <div class="custom-card">
+                    <div class="card-content">
+                        <!-- 左图右文布局 (flex) -->
+                        <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start gap-4">
+                            <!-- 左侧图片 -->
+                            <div class="flex-shrink-0">
+                                <img src="Assets/HuKaWeb.png" 
+                                     alt="HuKaWeb App Icon" 
+                                     class="app-image img-fluid">
+                            </div>
+                            <!-- 右侧内容 -->
+                            <div class="flex-grow-1 text-center text-md-start">
+                                <h3 class="fw-bold" style="color: #1e2a3a;">HuKaWeb(正在激情开发中)</h3>
+                                <p class="text-secondary-emphasis">支持 上百+ Android 接口 · 一键打包生成APK<br>完全免费 · 提供完整文档</p>
+                                <p class="small text-secondary">已实现: 蓝牙/存储/网络状态等100+接口封装</p>
+                                <!-- 按钮和底部信息在同一列，按钮加宽 -->
+                                <div class="d-flex flex-column align-items-center align-items-md-start">
+                                    <a href="#" class="btn project-btn btn-wide mt-3" onclick="alert('项目页面正在建设中，敬请期待'); return false;">
+                                        <i class="bi bi-box-arrow-up-right me-2"></i>前往项目页
+                                    </a>
+                                    <div class="mt-3 text-muted small">
+                                        <i class="bi bi-piggy-bank-fill me-1"></i> 永久免费 · 无需捐赠
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 作者的话：占满整行 (col-12)，与项目卡片等宽 -->
+        <div class="row justify-content-center my-5 py-4">
+            <div class="col-12 text-center">
+                <h2 class="section-title">作者的话</h2>
+            </div>
+            <div class="col-12">
+                <div class="talk-bubble">
+                    <div class="card-content">
+                        <i class="bi bi-chat-quote-fill"></i>
+                          嘿，我是狐咔！一个普普通通的个人开发者:3<br>
+                          我开发软件是为了方便用户和赚点小钱（通过赞助）。如果你有任何想法或bug反馈，欢迎通过底部社交找到我。希望这些工具能让你的生活更轻松！
+                        <div class="mt-3 text-end fst-italic">—— 狐咔HuKa · 2026</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 友情链接 (卡片效果) 使用三列，总宽度 col-12 -->
+        <div class="row mt-5 pt-4 g-4 justify-content-center">
+            <div class="col-12 text-center">
+                <h2 class="section-title">友情链接</h2>
+            </div>
+            <div class="col-md-4 d-flex">
+                <div class="custom-card text-center d-flex flex-column justify-content-center align-items-center">
+                    <img src="https://static.wikitide.net/anzswikiwiki/3/3f/Anzswiki.png?20250701023811" style="font-size: 3rem; color: #0d6efd;" width="130px"></img>
+                    <h5 class="mt-3">安兹百科</h5>
+                    <a href="https://anzswiki.miraheze.org" class="friend-link stretched-link" target="_blank">友商安兹创科旗下的复合专业性百科交流平台</a>
+                </div>
+            </div>
+            <div class="col-md-4 d-flex">
+                <div class="custom-card text-center d-flex flex-column justify-content-center align-items-center">
+                    <img src="https://freewd.top/img/index/FreewdIcon.png" style="font-size: 3rem; color: #0d6efd;" width="80px"></img>
+                    <h5 class="mt-3">Freewd Minecraft服务器</h5>
+                    <a href="https://freewd.top/" class="friend-link stretched-link" target="_blank">Freewd服务器
+基岩版 Minecraft 公益服</a>
+                </div>
+            </div>
+            <div class="col-md-4 d-flex">
+                <div class="custom-card text-center d-flex flex-column justify-content-center align-items-center">
+                    <i class="bi bi-people-fill" style="font-size: 3rem; color: #0d6efd;"></i>
+                    <h5 class="mt-3">ChatRoom</h5>
+                    <a href="http://www.islots.me" class="friend-link stretched-link" target="_blank" onclick=>免费多人聊天室，愉.快.聊</a>
+                </div>
+            </div>
+                <div class="col-md-4 d-flex">
+                <div class="custom-card text-center d-flex flex-column justify-content-center align-items-center">
+                    <img src="https://api.corexwear.com/Icon/b.png" style="font-size: 3rem; color: #0d6efd;" width="80px"></img>
+                    <h5 class="mt-3">芯云接口</h5>
+                    <a href="https://api.corexwear.com" class="friend-link stretched-link" target="_blank" onclick=>高性能、多接口、易接入的API服务平台</a>
+                </div>
+            </div>
+                      <div class="col-md-4 d-flex">
+                <div class="custom-card text-center d-flex flex-column justify-content-center align-items-center">
+                    <img src="https://jane.xingyige.cn/assets/images/logo.png" style="font-size: 3rem; color: #0d6efd;" width="80px"></img>
+                    <h5 class="mt-3">简源后台</h5>
+                    <a href="https://jane.xingyige.cn/" class="friend-link stretched-link" target="_blank" onclick=>简源-IAPP
+让源码获取更简单</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 底部黑色栏 ========== -->
+<footer class="footer-dark">
+    <div class="container">
+        <div class="row align-items-center gy-4">
+            <div class="col-md-6">
+                <div class="social">
+                    <a href="#" target="_blank" title="GitHub" onclick="alert('空气'); return false;"><i class="bi bi-github"></i></a>
+                    <a href="#" target="_blank" title="Twitter" onclick="alert('空气'); return false;"><i class="bi bi-twitter-x"></i></a>
+                    <a href="#" target="_blank" title="哔哩哔哩" onclick="alert('空气'); return false;"><i class="bi bi-camera-reels-fill"></i></a>
+                    <a href="#" target="_blank" title="酷安" onclick="alert('空气'); return false;"><i class="bi bi-people-fill"></i></a>
+                </div>
+                <div class="mt-3 small">
+                    <i class="bi bi-envelope me-1"></i> 联系邮箱：hukastudio@163.com
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="disclaimer">
+                    <h5 class="text-light mb-2" style="font-weight: 400;">免责声明</h5>
+                    <p class="small" style="color: #bcd0f0 !important;">
+                        本站所有资源及项目仅供学习与技术交流。开发者未成年，故内容可能存在不成熟之处。<br>
+                        HuKaWeb 完全免费，请勿用于非法用途。使用第三方接口请遵守相应法律法规。
+                    </p>
+                    <p class="small text-white-50 mt-2">© 2025 HuKaHuKa Studio · 由一人用热爱驱动</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- 动态泡泡画布脚本 (大浅色泡泡) -->
+<script>
+(function() {
+    const canvas = document.getElementById('bubble-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let bubbles = [];
+    let animationFrame = null;
+
+    const BUBBLE_COUNT = 14; 
+
+    class Bubble {
+        constructor(w, h) {
+            this.x = Math.random() * w;
+            this.y = Math.random() * h;
+            this.radius = 20 + Math.random() * 45;
+            this.speedY = -0.2 - Math.random() * 0.3;
+            this.speedX = (Math.random() - 0.5) * 0.15;
+            this.opacity = 0.45 + Math.random() * 0.35;
+        }
+        update(w, h) {
+            this.y += this.speedY;
+            this.x += this.speedX;
+            if (this.y + this.radius < 0) {
+                this.y = h + this.radius;
+                this.x = Math.random() * w;
+            }
+            if (this.x - this.radius < 0) {
+                this.x = this.radius;
+                this.speedX *= -0.7;
+            } else if (this.x + this.radius > w) {
+                this.x = w - this.radius;
+                this.speedX *= -0.7;
+            }
+            if (this.y - this.radius > h + 20) {
+                this.y = -this.radius;
+                this.x = Math.random() * w;
+            }
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(this.x - 5, this.y - 5, this.radius * 0.25, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fill();
+        }
+    }
+
+    function initBubbles(w, h) {
+        bubbles = [];
+        for (let i = 0; i < BUBBLE_COUNT; i++) {
+            bubbles.push(new Bubble(w, h));
+        }
+    }
+
+    function resizeCanvas() {
+        width = canvas.clientWidth;
+        height = canvas.clientHeight;
+        canvas.width = width;
+        canvas.height = height;
+        initBubbles(width, height);
+    }
+
+    function animate() {
+        if (!ctx || !canvas) return;
+        ctx.clearRect(0, 0, width, height);
+        for (let b of bubbles) {
+            b.update(width, height);
+            b.draw();
+        }
+        animationFrame = requestAnimationFrame(animate);
+    }
+
+    function startAnimation() {
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        resizeCanvas();
+        animate();
+    }
+
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            if (width !== canvas.clientWidth || height !== canvas.clientHeight) {
+                startAnimation();
+            }
+        }, 100);
+    });
+
+    window.addEventListener('load', startAnimation);
+})();
+</script>
+
+<!-- 箭头点击滚动 -->
+<script>
+    (function() {
+        const scrollArrow = document.querySelector('.hero-arrow');
+        if (scrollArrow) {
+            scrollArrow.addEventListener('click', function(e) {
+                e.preventDefault();
+                const intro = document.getElementById('intro');
+                if (intro) {
+                    intro.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        }
+    })();
+</script>
+</body>
+</html>
