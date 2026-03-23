@@ -63,22 +63,34 @@
             letter-spacing: 0.2rem;
             opacity: 0.9;
         }
-        .hero-arrow {
+        /* ----- 箭头包裹层：负责定位，但不响应点击 ----- */
+        .hero-arrow-wrapper {
             position: absolute;
             bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 2.8rem;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            pointer-events: none;  /* 整个区域不捕获点击 */
+            z-index: 3;
+        }
+        /* 箭头本体：只有它自己可以点击 */
+        .hero-arrow {
+            display: inline-block;
             color: white;
+            font-size: 2.8rem;
             cursor: pointer;
             transition: transform 0.2s ease, opacity 0.2s;
             opacity: 0.8;
             text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-            z-index: 3;
             line-height: 1;
+            pointer-events: auto;  /* 允许点击 */
+            background: transparent;
+            border: none;
+            padding: 0;
+            outline: none;
         }
         .hero-arrow:hover {
-            transform: translateX(-50%) translateY(6px);
+            transform: translateY(6px);
             opacity: 1;
         }
 
@@ -254,8 +266,10 @@
                 font-size: 3.5rem;
             }
             .hero-arrow {
-                bottom: 15px;
                 font-size: 2.4rem;
+            }
+            .hero-arrow-wrapper {
+                bottom: 15px;
             }
             .dev-avatar {
                 width: 120px;
@@ -298,9 +312,12 @@
         <h1>HuKaHuKa</h1>
         <p class="lead">独立开发 · 纯粹热爱</p>
     </div>
-    <a href="#intro" class="hero-arrow" style="text-decoration: none; color: white;">
-        <i class="bi bi-arrow-down-circle-fill"></i>
-    </a>
+    <!-- 修复：使用包裹层 + 仅图标可点 -->
+    <div class="hero-arrow-wrapper">
+        <div class="hero-arrow" role="button" tabindex="0" aria-label="向下滚动">
+            <i class="bi bi-arrow-down-circle-fill"></i>
+        </div>
+    </div>
 </section>
 
 <!-- ========== 白色背景区域 ========== -->
@@ -427,6 +444,13 @@
                     <h5 class="mt-3">简源后台</h5>
                     <a href="https://jane.xingyige.cn/" class="friend-link stretched-link" target="_blank" onclick=>简源-IAPP
 让源码获取更简单</a>
+                </div>
+            </div>
+                   <div class="col-md-4 d-flex">
+                <div class="custom-card text-center d-flex flex-column justify-content-center align-items-center">
+                    <img src="https://toolx.top/toolx.webp" style="font-size: 3rem; color: #0d6efd;" width="80px"></img>
+                    <h5 class="mt-3">TOOLX</h5>
+                    <a href="https://toolx.top/" class="friend-link stretched-link" target="_blank" onclick=>TOOLX 是一支专注于开发者效率的专业团队，以高质量工具、脚手架与配套项目为支点，帮助开发者把时间花在真正创造价值的地方</a>
                 </div>
             </div>
         </div>
